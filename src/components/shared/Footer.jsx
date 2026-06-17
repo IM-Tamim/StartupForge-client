@@ -1,6 +1,8 @@
 import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
-import { FiZap, FiMail, FiPhone } from "react-icons/fi";
+import { FiMail, FiPhone } from "react-icons/fi";
 import Link from "next/link";
+import Image from "next/image";
+import logo from "@/assets/logo.png";
 
 const Footer = () => {
     return (
@@ -12,9 +14,7 @@ const Footer = () => {
                     {/* ── Logo & tagline ── */}
                     <div className="space-y-4 flex flex-col items-center sm:items-start">
                         <div className="flex items-center justify-center gap-2">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary text-secondary-content shrink-0">
-                                <FiZap size={16} />
-                            </span>
+                            <Image src={logo} alt="Logo" width={40} height={40} />
                             <h2 className="text-2xl font-black tracking-tight leading-none">
                                 <span className="text-base-content">Startup</span>
                                 <span className="text-secondary">Forge</span>

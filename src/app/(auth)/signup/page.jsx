@@ -351,7 +351,7 @@ const SignUpForm = () => {
                                     setImageFile(null);
                                     setImagePreview(null);
                                 }}
-                                className="btn btn-ghost btn-outline px-5 rounded-xl text-sm font-medium"
+                                className="btn btn-ghost btn-outline btn-error px-5 rounded-xl text-sm font-medium"
                             >
                                 Reset
                             </button>
@@ -368,7 +368,7 @@ const SignUpForm = () => {
                         <button
                             type="button"
                             onClick={handleGoogleLogin}
-                            className="btn btn-outline w-full flex items-center justify-center gap-2 rounded-xl text-sm font-medium"
+                            className="btn btn-outline btn-info w-full flex items-center justify-center gap-2 rounded-xl text-sm font-medium"
                         >
                             <SiGoogle size={15} />
                             Continue with Google
@@ -376,7 +376,7 @@ const SignUpForm = () => {
 
                         <p className="text-center text-sm text-base-content/50">
                             Already have an account?{" "}
-                            <Link href="/signin" className="font-semibold text-secondary hover:opacity-70 transition-opacity">
+                            <Link href="/signin" className="font-semibold text-warning hover:opacity-70 transition-opacity">
                                 Sign In
                             </Link>
                         </p>

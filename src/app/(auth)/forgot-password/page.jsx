@@ -42,7 +42,7 @@ const ForgotPasswordPage = () => {
                     {/* Back to Sign In */}
                     <Link
                         href="/signin"
-                        className="btn btn-secondary btn-outline w-full flex items-center justify-center gap-2 rounded-xl text-sm font-bold"
+                        className="btn btn-secondary btn-outline btn-info w-full flex items-center justify-center gap-2 rounded-xl text-sm font-bold"
                     >
                         <FiArrowLeft size={15} /> Back to Sign In
                     </Link>

@@ -94,7 +94,7 @@ const SignInForm = () => {
                                 </label>
                                 <Link
                                     href="/forgot-password"
-                                    className="text-xs text-secondary hover:opacity-70 font-medium transition-opacity"
+                                    className="text-xs text-warning hover:opacity-70 font-medium transition-opacity"
                                 >
                                     Forgot password?
                                 </Link>
@@ -135,7 +135,7 @@ const SignInForm = () => {
                             </button>
                             <button
                                 type="reset"
-                                className="btn btn-ghost btn-outline px-5 rounded-xl text-sm font-medium"
+                                className="btn btn-ghost btn-outline btn-error px-5 rounded-xl text-sm font-medium"
                             >
                                 Reset
                             </button>
@@ -152,7 +152,7 @@ const SignInForm = () => {
                         <button
                             type="button"
                             onClick={handleGoogleLogin}
-                            className="btn btn-outline w-full flex items-center justify-center gap-2 rounded-xl text-sm font-medium"
+                            className="btn btn-outline btn-info w-full flex items-center justify-center gap-2 rounded-xl text-sm font-medium"
                         >
                             <SiGoogle size={15} />
                             Continue with Google
@@ -162,7 +162,7 @@ const SignInForm = () => {
                             Don&apos;t have an account?{" "}
                             <Link
                                 href="/signup"
-                                className="font-semibold text-secondary hover:opacity-70 transition-opacity"
+                                className="font-semibold text-warning hover:opacity-70 transition-opacity"
                             >
                                 Create one
                             </Link>
