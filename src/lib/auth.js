@@ -25,6 +25,12 @@ export const auth = betterAuth({
       },
       plan:{
         defaultValue: "collaborator_free"
+      },
+      bio:{
+        defaultValue: ""
+      }
+      ,skills:{
+        defaultValue: []
       }
     }
   },
