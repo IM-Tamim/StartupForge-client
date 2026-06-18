@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import toast from "react-hot-toast";
-import { FiZap, FiUpload, FiSave, FiTrash2 } from "react-icons/fi";
+import { FiZap, FiUpload, FiSave, FiTrash2, FiClock, FiCheckCircle } from "react-icons/fi";
 import { getMyStartup } from "@/lib/api/startups";
 import { createStartup, updateStartup, deleteStartup } from "@/lib/actions/startups";
 
@@ -23,7 +23,6 @@ export default function MyStartupPage() {
     const [logoPreview, setLogoPreview] = useState(null);
     const [form, setForm]             = useState(EMPTY_FORM);
 
-    // ── Load existing startup ──
     useEffect(() => {
         if (!session?.user) return;
         getMyStartup(session.user.email)
@@ -53,7 +52,6 @@ export default function MyStartupPage() {
         return data.data.url;
     };
 
-    // ── Submit (create or update) ──
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
@@ -64,7 +62,6 @@ export default function MyStartupPage() {
             const payload = { ...form, logo: logoUrl, founder_email: session.user.email };
 
             if (startup?._id) {
-                // UPDATE
                 const data = await updateStartup(startup._id, payload);
                 if (data.modifiedCount > 0) {
                     toast.success("Startup updated!");
@@ -73,11 +70,10 @@ export default function MyStartupPage() {
                     toast("No changes made.");
                 }
             } else {
-                // CREATE
                 const data = await createStartup(payload);
                 if (data.insertedId) {
-                    toast.success("Startup created!");
-                    setStartup({ _id: data.insertedId, ...payload });
+                    toast.success("Startup created! Waiting for admin approval.");
+                    setStartup({ _id: data.insertedId, ...payload, status: "pending" });
                 } else {
                     toast.error("Failed to create startup.");
                 }
@@ -89,7 +85,6 @@ export default function MyStartupPage() {
         }
     };
 
-    // ── Delete ──
     const handleDelete = async () => {
         if (!confirm("Are you sure you want to delete your startup? This cannot be undone.")) return;
         setDeleting(true);
@@ -123,17 +118,41 @@ export default function MyStartupPage() {
                         {startup ? "Update your startup profile" : "Create your startup profile"}
                     </p>
                 </div>
-                {startup && (
-                    <button
-                        onClick={handleDelete}
-                        disabled={deleting}
-                        className="btn btn-error btn-sm btn-outline rounded-xl gap-2"
-                    >
-                        {deleting ? <span className="loading loading-spinner loading-xs" /> : <FiTrash2 size={14} />}
-                        Delete
-                    </button>
-                )}
+                <div className="flex items-center gap-3">
+                    {/* Status badge */}
+                    {startup?.status && (
+                        <span className={`badge badge-md gap-1 ${
+                            startup.status === "approved"
+                                ? "badge-success"
+                                : "badge-warning"
+                        }`}>
+                            {startup.status === "approved" ? (
+                                <><FiCheckCircle size={12} /> Approved</>
+                            ) : (
+                                <><FiClock size={12} /> Pending Approval</>
+                            )}
+                        </span>
+                    )}
+                    {startup && (
+                        <button
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="btn btn-error btn-sm btn-outline rounded-xl gap-2"
+                        >
+                            {deleting ? <span className="loading loading-spinner loading-xs" /> : <FiTrash2 size={14} />}
+                            Delete
+                        </button>
+                    )}
+                </div>
             </div>
+
+            {/* Pending notice */}
+            {startup?.status === "pending" && (
+                <div className="mb-6 px-4 py-3 rounded-xl bg-warning/10 border border-warning/30 text-warning text-sm flex items-center gap-2">
+                    <FiClock size={14} />
+                    Your startup is awaiting admin approval. It will not appear on the public browse page until approved.
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="rounded-2xl border border-base-300 bg-base-100 p-6 lg:p-8 flex flex-col gap-6">
 

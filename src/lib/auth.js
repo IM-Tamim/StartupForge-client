@@ -28,9 +28,12 @@ export const auth = betterAuth({
       },
       bio:{
         defaultValue: ""
-      }
-      ,skills:{
+      },
+      skills:{
         defaultValue: []
+      },
+      isBlocked:{
+        defaultValue: false
       }
     }
   },

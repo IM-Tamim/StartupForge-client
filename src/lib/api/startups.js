@@ -12,3 +12,8 @@ export function getStartup(id) {
 export function getMyStartup(founderEmail) {
   return serverFetch(`/api/my-startup?founder_email=${founderEmail}`);
 }
+
+export function getAllStartups(status = "") {
+  const query = status ? `?status=${status}` : "";
+  return serverFetch(`/api/admin/startups${query}`);
+}
