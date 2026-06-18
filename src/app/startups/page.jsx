@@ -126,7 +126,7 @@ export default function BrowseStartupsPage() {
                         ))}
                     </div>
                 ) : startups.length === 0 ? (
-                    <div className="text-center py-24 rounded-2xl border border-base-300 bg-base-100 mb-5">
+                    <div className="text-center rounded-2xl border border-base-300 bg-base-100">
                         <p className="text-lg font-semibold text-base-content/40 mb-2">No startups found</p>
                         <p className="text-sm text-base-content/30 mb-5">Try adjusting your search or filters</p>
                         <button onClick={clearFilters} className="btn btn-secondary btn-sm rounded-xl">
