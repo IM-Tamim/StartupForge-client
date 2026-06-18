@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 import { FiSave, FiUpload } from "react-icons/fi";
 
 const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
-const API_BASE  = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function ProfilePage() {
     const { data: session, isPending } = authClient.useSession();
@@ -36,16 +35,18 @@ export default function ProfilePage() {
             let imageUrl = session?.user?.image || "";
             if (imageFile) imageUrl = await uploadToImgbb(imageFile);
 
-            const res = await fetch(`${API_BASE}/api/users/profile`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: form.name, image: imageUrl, email: session.user.email }),
+            // Use Better Auth's built-in updateUser instead of custom /api/users/profile
+            const { error } = await authClient.updateUser({
+                name: form.name,
+                image: imageUrl,
             });
-            const data = await res.json();
-            if (data.modifiedCount > 0 || data.acknowledged) {
-                toast.success("Profile updated!");
+
+            if (error) {
+                toast.error(error.message || "Update failed");
             } else {
-                toast("No changes made.");
+                toast.success("Profile updated!");
+                // clear the temp file so we don't re-upload on next save
+                setImageFile(null);
             }
         } catch (err) {
             toast.error(err.message || "Something went wrong.");
