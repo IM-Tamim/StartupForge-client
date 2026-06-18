@@ -3,6 +3,8 @@ import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FiZap, FiFileText, FiCheckCircle, FiArrowRight, FiPlusCircle } from "react-icons/fi";
+import { getOpportunities } from "@/lib/api/opportunities";
+import { getApplications } from "@/lib/api/applications";
 
 export default function FounderOverviewPage() {
     const { data: session } = authClient.useSession();
@@ -11,12 +13,11 @@ export default function FounderOverviewPage() {
 
     useEffect(() => {
         if (!session?.user) return;
-        const base = process.env.NEXT_PUBLIC_API_URL;
         const email = session.user.email;
 
         Promise.all([
-            fetch(`${base}/api/opportunities?founder_email=${email}`).then((r) => r.json()),
-            fetch(`${base}/api/applications?founder_email=${email}`).then((r) => r.json()),
+            getOpportunities({ founder_email: email }),
+            getApplications({ founder_email: email }),
         ])
             .then(([opps, apps]) => {
                 const oppsArr = Array.isArray(opps) ? opps : opps.opportunities || [];
