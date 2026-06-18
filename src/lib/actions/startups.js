@@ -21,3 +21,15 @@ export async function deleteStartup(id) {
     method: "DELETE",
   });
 }
+
+export async function approveStartup(id) {
+  return serverFetch(`/api/admin/startups/${id}/approve`, {
+    method: "PATCH",
+  });
+}
+
+export async function deleteStartupAdmin(id) {
+  return serverFetch(`/api/admin/startups/${id}`, {
+    method: "DELETE",
+  });
+}

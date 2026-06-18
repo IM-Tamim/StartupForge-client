@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import toast from "react-hot-toast";
-import { FiZap, FiX } from "react-icons/fi";
+import { FiZap, FiX, FiClock, FiLock, FiArrowRight } from "react-icons/fi";
+import Link from "next/link";
 import { getMyStartup } from "@/lib/api/startups";
 import { createOpportunity } from "@/lib/actions/opportunities";
 
@@ -41,6 +42,7 @@ export default function AddOpportunityPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!startup) { toast.error("Create your startup first before posting opportunities."); return; }
+        if (startup.status !== "approved") { toast.error("Your startup must be approved by an admin before posting opportunities."); return; }
         if (skills.length === 0) { toast.error("Add at least one required skill."); return; }
 
         setSaving(true);
@@ -72,18 +74,68 @@ export default function AddOpportunityPage() {
         </div>
     );
 
+    // ── No startup at all ──
+    if (!startup?._id) {
+        return (
+            <div>
+                <div className="mb-8">
+                    <h1 className="text-2xl font-black text-base-content">Add Opportunity</h1>
+                    <p className="text-sm text-base-content/50 mt-1">Post a role and find the right collaborator.</p>
+                </div>
+
+                <div className="rounded-2xl border border-base-300 bg-base-100 p-8 flex flex-col items-center text-center gap-4">
+                    <div className="w-14 h-14 rounded-full bg-warning/10 flex items-center justify-center">
+                        <FiZap size={24} className="text-warning" />
+                    </div>
+                    <div>
+                        <p className="font-bold text-base-content mb-1">You need a startup profile first</p>
+                        <p className="text-sm text-base-content/50 max-w-sm">
+                            Create your startup profile before you can post opportunities for collaborators.
+                        </p>
+                    </div>
+                    <Link href="/dashboard/founder/my-startup" className="btn btn-secondary rounded-xl gap-2">
+                        Create Startup Profile <FiArrowRight size={15} />
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    // ── Startup exists but pending admin approval ──
+    if (startup.status !== "approved") {
+        return (
+            <div>
+                <div className="mb-8">
+                    <h1 className="text-2xl font-black text-base-content">Add Opportunity</h1>
+                    <p className="text-sm text-base-content/50 mt-1">Post a role and find the right collaborator.</p>
+                </div>
+
+                <div className="rounded-2xl border border-warning/30 bg-warning/10 p-8 flex flex-col items-center text-center gap-4 mb-6">
+                    <div className="w-14 h-14 rounded-full bg-warning/20 flex items-center justify-center">
+                        <FiClock size={24} className="text-warning" />
+                    </div>
+                    <div>
+                        <p className="font-bold text-base-content mb-1">Waiting for admin approval</p>
+                        <p className="text-sm text-base-content/50 max-w-sm">
+                            Your startup <span className="font-semibold text-secondary">{startup.startup_name}</span> is pending approval. 
+                            You will be able to post opportunities once an admin approves it.
+                        </p>
+                    </div>
+                    <Link href="/dashboard/founder/my-startup" className="btn btn-ghost btn-outline rounded-xl gap-2">
+                        View My Startup <FiArrowRight size={15} />
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    // ── Approved startup — show the form ──
     return (
         <div>
             <div className="mb-8">
                 <h1 className="text-2xl font-black text-base-content">Add Opportunity</h1>
                 <p className="text-sm text-base-content/50 mt-1">Post a role and find the right collaborator.</p>
             </div>
-
-            {!startup && (
-                <div className="mb-6 px-4 py-3 rounded-xl bg-warning/10 border border-warning/30 text-warning text-sm">
-                    You need to create your startup profile first before posting opportunities.
-                </div>
-            )}
 
             <form onSubmit={handleSubmit} className="rounded-2xl border border-base-300 bg-base-100 p-6 lg:p-8 flex flex-col gap-6">
 
