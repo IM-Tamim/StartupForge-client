@@ -34,10 +34,8 @@ const adminLinks = [
   { href: "/dashboard/admin/transactions",           label: "Transactions",         icon: FiDollarSign },
 ];
 
-// ── Outside DashboardSidebar to avoid "component created during render" ──
 const SidebarBody = ({ user, links, onLinkClick, onLogout }) => {
   const pathname = usePathname();
-
   const isActive = ({ href, exact }) =>
     exact ? pathname === href : pathname.startsWith(href);
 
@@ -97,13 +95,18 @@ const SidebarBody = ({ user, links, onLinkClick, onLogout }) => {
 };
 
 const DashboardSidebar = ({ user }) => {
-  const router = useRouter();
+  const router   = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   const links =
     user.role === "founder"        ? founderLinks
     : user.role === "collaborator" ? collaboratorLinks
     : adminLinks;
+
+  const currentLabel = links.find(({ href, exact }) =>
+    exact ? pathname === href : pathname.startsWith(href)
+  )?.label || "Dashboard";
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -118,20 +121,23 @@ const DashboardSidebar = ({ user }) => {
         <SidebarBody user={user} links={links} onLogout={handleLogout} />
       </aside>
 
-      {/* Mobile toggle */}
-      <button
-        onClick={() => setOpen(true)}
-        className="lg:hidden fixed bottom-5 left-5 z-40 btn btn-secondary btn-circle shadow-lg"
-        aria-label="Open menu"
-      >
-        <FiMenu size={20} />
-      </button>
+      {/* Mobile top bar */}
+      <div className="lg:hidden fixed top-16 left-0 right-0 z-30 flex items-center justify-between px-4 h-12 bg-base-100 border-b border-base-300 shadow-sm">
+        <p className="text-sm font-bold text-base-content">{currentLabel}</p>
+        <button
+          onClick={() => setOpen(true)}
+          className="btn btn-ghost btn-sm btn-square rounded-xl"
+          aria-label="Open menu"
+        >
+          <FiMenu size={18} />
+        </button>
+      </div>
 
       {/* Mobile drawer */}
       {open && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <aside className="relative w-64 bg-base-100 border-r border-base-300 flex flex-col shadow-2xl">
+          <aside className="relative w-72 bg-base-100 border-r border-base-300 flex flex-col shadow-2xl">
             <button
               onClick={() => setOpen(false)}
               className="absolute top-4 right-4 btn btn-ghost btn-xs btn-circle z-10"

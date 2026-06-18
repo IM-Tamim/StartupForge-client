@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }) {
         <div className="flex min-h-[calc(100vh-4rem)]">
             <DashboardSidebar user={session.user} />
             <main className="flex-1 overflow-auto bg-base-200">
-                <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+                <div className="pt-12 lg:pt-0 p-6 lg:p-8 max-w-5xl mx-auto">
                     {children}
                 </div>
             </main>
