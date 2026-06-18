@@ -6,7 +6,7 @@ import NavLink from "./NavLink";
 import ThemeController from "./ThemeController";
 import toast from "react-hot-toast";
 import logo from "@/assets/logo.png";
-import { FiMenu, FiZap, FiGrid, FiUser, FiLogOut, FiChevronDown } from "react-icons/fi";
+import { FiMenu, FiGrid, FiUser, FiLogOut, FiChevronDown } from "react-icons/fi";
 
 const Navbar = () => {
     const { data: session, isPending } = authClient.useSession();
@@ -17,11 +17,18 @@ const Navbar = () => {
         toast.success("Logged out successfully!");
     };
 
+    // Role-aware dashboard link — no more broken /dashboard
+    const dashboardHref =
+        user?.role === "founder"        ? "/dashboard/founder"
+        : user?.role === "collaborator" ? "/dashboard/collaborator"
+        : user?.role === "admin"        ? "/dashboard/admin"
+        : "/dashboard/founder";
+
     const links = (
         <>
             <li><NavLink href="/">Home</NavLink></li>
             <li><NavLink href="/startups">Browse Startups</NavLink></li>
-            <li><NavLink href="/opportunities">Opportunities</NavLink></li>
+            <li><NavLink href="/opportunities" matchPaths={ ["/opportunities"] }>Opportunities</NavLink></li>
         </>
     );
 
@@ -104,7 +111,7 @@ const Navbar = () => {
                                 </li>
                                 <li>
                                     <Link
-                                        href="/dashboard"
+                                        href={dashboardHref}
                                         className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-base-content hover:bg-base-200 transition-colors"
                                     >
                                         <FiGrid size={15} /> Dashboard
