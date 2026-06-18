@@ -14,14 +14,14 @@ export default function FeaturedOpportunities() {
         getOpportunities({ limit: 4 })
             .then((data) => {
                 const arr = Array.isArray(data) ? data : [];
-                setOpportunities(arr.slice(0, 4));
+                setOpportunities(arr.slice(0, 3));
             })
             .catch(() => setOpportunities([]))
             .finally(() => setLoading(false));
     }, []);
 
     return (
-        <section className="py-20 bg-base-100">
+        <section className="py-20 bg-base-300">
             <div className="max-w-6xl mx-auto px-6">
 
                 <div className="flex items-end justify-between mb-10 gap-4">
@@ -42,7 +42,7 @@ export default function FeaturedOpportunities() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <OpportunityCardSkeleton key={i} />
                         ))}
@@ -56,7 +56,7 @@ export default function FeaturedOpportunities() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {opportunities.map((o) => (
                             <OpportunityCard key={o._id} opportunity={o} />
                         ))}

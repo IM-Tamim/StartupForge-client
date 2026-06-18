@@ -14,7 +14,7 @@ export default function FeaturedStartUps() {
         getStartups({ limit: 4 })
             .then((data) => {
                 const arr = Array.isArray(data) ? data : [];
-                setStartups(arr.slice(0, 4));
+                setStartups(arr.slice(0, 3));
             })
             .catch(() => setStartups([]))
             .finally(() => setLoading(false));
@@ -42,7 +42,7 @@ export default function FeaturedStartUps() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <StartupCardSkeleton key={i} />
                         ))}
@@ -56,7 +56,7 @@ export default function FeaturedStartUps() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {startups.map((s) => (
                             <StartupCard key={s._id} startup={s} />
                         ))}
