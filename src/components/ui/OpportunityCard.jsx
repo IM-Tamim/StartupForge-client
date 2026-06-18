@@ -62,7 +62,7 @@ const OpportunityCard = ({ opportunity }) => (
         {/* CTA */}
         <Link
             href={`/opportunities/${opportunity._id}`}
-            className="btn btn-sm btn-ghost btn-outline rounded-xl w-full group-hover:btn-secondary transition-all"
+            className="btn btn-sm btn-ghost btn-outline rounded-xl w-full btn-secondary transition-all"
         >
             View & Apply <FiArrowRight size={13} />
         </Link>

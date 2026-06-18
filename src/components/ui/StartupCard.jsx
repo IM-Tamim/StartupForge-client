@@ -54,7 +54,7 @@ const StartupCard = ({ startup }) => (
         {/* CTA */}
         <Link
             href={`/startups/${startup._id}`}
-            className="btn btn-sm btn-ghost btn-outline rounded-xl w-full mt-auto group-hover:btn-secondary transition-all"
+            className="btn btn-sm btn-ghost btn-outline rounded-xl w-full mt-auto btn-secondary transition-all"
         >
             View Startup <FiArrowRight size={13} />
         </Link>
