@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { FiArrowRight, FiTag } from "react-icons/fi";
+import { FiArrowRight, FiTag, FiUsers } from "react-icons/fi";
 
 const badgeColor = {
     "Pre-Seed": "badge-ghost",
@@ -45,10 +45,18 @@ const StartupCard = ({ startup }) => (
             {startup.description}
         </p>
 
-        {/* Industry */}
-        <div className="flex items-center gap-1.5 text-xs text-base-content/50">
-            <FiTag size={11} className="text-secondary" />
-            {startup.industry}
+        {/* Industry + Team Size */}
+        <div className="flex items-center gap-3 text-xs text-base-content/50 flex-wrap">
+            <div className="flex items-center gap-1.5">
+                <FiTag size={11} className="text-secondary" />
+                {startup.industry}
+            </div>
+            {startup.team_size > 0 && (
+                <div className="flex items-center gap-1.5">
+                    <FiUsers size={11} className="text-secondary" />
+                    Team Size: {startup.team_size}
+                </div>
+            )}
         </div>
 
         {/* CTA */}

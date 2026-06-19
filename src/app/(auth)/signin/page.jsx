@@ -1,7 +1,7 @@
 "use client";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SiGoogle } from "react-icons/si";
 import { Suspense, useState } from "react";
 import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from "react-icons/fi";
@@ -9,6 +9,8 @@ import toast from "react-hot-toast";
 
 const SignInForm = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirect = searchParams.get("redirect") || "/";
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -40,7 +42,7 @@ const SignInForm = () => {
             }
 
             toast.success("Welcome back!");
-            router.push("/");
+            router.push(redirect);
         } catch (err) {
             toast.error(err.message || "Something went wrong.");
         } finally {
@@ -49,6 +51,7 @@ const SignInForm = () => {
     };
 
     const handleGoogleLogin = async () => {
+        localStorage.setItem("redirectAfterLogin", redirect);
         const { error } = await authClient.signIn.social({
             provider: "google",
             callbackURL: "/post-login",

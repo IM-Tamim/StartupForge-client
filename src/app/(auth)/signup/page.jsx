@@ -1,7 +1,7 @@
 "use client";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SiGoogle } from "react-icons/si";
 import {
     FiUser, FiMail, FiLock, FiUpload, FiArrowRight,
@@ -58,6 +58,8 @@ const RuleItem = ({ passed, label }) => (
 
 const SignUpForm = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirect = searchParams.get("redirect") || "/";
     const [password, setPassword] = useState("");
     const [passwordTouched, setPasswordTouched] = useState(false);
     const [formError, setFormError] = useState("");
@@ -139,7 +141,7 @@ const SignUpForm = () => {
             await fetch("/api/auth/issue-token", { method: "POST" });
 
             toast.success("Welcome to StartupForge!");
-            router.push("/");
+            router.push(redirect);
         } catch (err) {
             setFormError(err.message || "Something went wrong.");
             toast.error(err.message || "Something went wrong.");
@@ -150,6 +152,7 @@ const SignUpForm = () => {
     };
 
     const handleGoogleLogin = async () => {
+        localStorage.setItem("redirectAfterLogin", redirect);
         const { error } = await authClient.signIn.social({
             provider: "google",
             callbackURL: "/post-login",

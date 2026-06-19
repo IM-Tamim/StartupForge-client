@@ -1,168 +1,279 @@
 "use client";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
-import Link from "next/link";
-import {
-    FiZap, FiFileText, FiCheckCircle, FiClock, FiArrowRight,
-    FiPlusCircle, FiBriefcase, FiAlertCircle, FiTrendingUp,
-} from "react-icons/fi";
-import { getOpportunities } from "@/lib/api/opportunities";
-import { getApplications } from "@/lib/api/applications";
+import toast from "react-hot-toast";
+import { FiZap, FiUpload, FiSave, FiTrash2, FiClock, FiCheckCircle } from "react-icons/fi";
 import { getMyStartup } from "@/lib/api/startups";
-import {
-    PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
-} from "recharts";
+import { createStartup, updateStartup, deleteStartup } from "@/lib/actions/startups";
 
-export default function FounderOverviewPage() {
+const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+
+const fundingStages = ["Pre-Seed", "Seed", "Series A", "Series B", "Bootstrapped", "Other"];
+const industries   = ["Tech", "Health", "Fintech", "EdTech", "SaaS", "E-commerce", "AI/ML", "Other"];
+
+const EMPTY_FORM = { startup_name: "", industry: "", description: "", funding_stage: "Pre-Seed", logo: "", team_size: "" };
+
+export default function MyStartupPage() {
     const { data: session } = authClient.useSession();
-    const [stats, setStats] = useState({ totalOpps: 0, totalApps: 0, accepted: 0, pending: 0, rejected: 0 });
-    const [startupStatus, setStartupStatus] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [startup, setStartup]       = useState(null);
+    const [loading, setLoading]       = useState(true);
+    const [saving, setSaving]         = useState(false);
+    const [deleting, setDeleting]     = useState(false);
+    const [logoFile, setLogoFile]     = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
+    const [form, setForm]             = useState(EMPTY_FORM);
 
     useEffect(() => {
         if (!session?.user) return;
-        const email = session.user.email;
-
-        Promise.all([
-            getOpportunities({ founder_email: email }),
-            getApplications({ founder_email: email }),
-            getMyStartup(email).catch(() => null),
-        ])
-            .then(([opps, apps, startup]) => {
-                const oppsArr = Array.isArray(opps) ? opps : opps.opportunities || [];
-                const appsArr = Array.isArray(apps) ? apps : apps.applications || [];
-                setStats({
-                    totalOpps: oppsArr.length,
-                    totalApps: appsArr.length,
-                    accepted: appsArr.filter((a) => a.status === "accepted").length,
-                    pending: appsArr.filter((a) => a.status === "pending").length,
-                    rejected: appsArr.filter((a) => a.status === "rejected").length,
-                });
-                setStartupStatus(startup?.status || null);
+        getMyStartup(session.user.email)
+            .then((data) => {
+                if (data?._id) {
+                    setStartup(data);
+                    setForm({
+                        startup_name:  data.startup_name  || "",
+                        industry:      data.industry      || "",
+                        description:   data.description   || "",
+                        funding_stage: data.funding_stage || "Pre-Seed",
+                        logo:          data.logo          || "",
+                        team_size:     data.team_size     || "",
+                    });
+                    if (data.logo) setLogoPreview(data.logo);
+                }
             })
-            .catch(() => { })
+            .catch(() => {})
             .finally(() => setLoading(false));
     }, [session]);
 
-    const pieData = [
-        { name: "Accepted", value: stats.accepted, fill: "#10b981" },
-        { name: "Pending", value: stats.pending, fill: "#f59e0b" },
-        { name: "Rejected", value: stats.rejected, fill: "#ef4444" },
-    ].filter((d) => d.value > 0);
+    const uploadToImgbb = async (file) => {
+        const fd = new FormData();
+        fd.append("image", file);
+        const res  = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
+        const data = await res.json();
+        if (!data.success) throw new Error("Image upload failed");
+        return data.data.url;
+    };
 
-    const statCards = [
-        { label: "Total Opportunities", value: stats.totalOpps, icon: FiZap, color: "text-secondary", bg: "bg-secondary/10" },
-        { label: "Total Applications", value: stats.totalApps, icon: FiFileText, color: "text-info", bg: "bg-info/10" },
-        { label: "Accepted Members", value: stats.accepted, icon: FiCheckCircle, color: "text-success", bg: "bg-success/10" },
-    ];
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            let logoUrl = form.logo;
+            if (logoFile) logoUrl = await uploadToImgbb(logoFile);
 
-    const quickLinks = [
-        { href: "/dashboard/founder/my-startup", label: "My Startup", desc: "Create or update your startup profile", icon: FiZap },
-        { href: "/dashboard/founder/add-opportunity", label: "Post Opportunity", desc: "Find your next team member", icon: FiPlusCircle },
-        { href: "/dashboard/founder/manage-opportunities", label: "Manage Opportunities", desc: "Edit or delete your posted roles", icon: FiBriefcase },
-        { href: "/dashboard/founder/applications", label: "Applications", desc: "Review and respond to applicants", icon: FiCheckCircle },
-    ];
+            const payload = { ...form, logo: logoUrl, founder_email: session.user.email };
+
+            if (startup?._id) {
+                const data = await updateStartup(startup._id, payload);
+                if (data.modifiedCount > 0) {
+                    toast.success("Startup updated!");
+                    setStartup((prev) => ({ ...prev, ...payload }));
+                } else {
+                    toast("No changes made.");
+                }
+            } else {
+                const data = await createStartup(payload);
+                if (data.insertedId) {
+                    toast.success("Startup created! Waiting for admin approval.");
+                    setStartup({ _id: data.insertedId, ...payload, status: "pending" });
+                } else {
+                    toast.error("Failed to create startup.");
+                }
+            }
+        } catch (err) {
+            toast.error(err.message || "Something went wrong.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!confirm("Are you sure you want to delete your startup? This cannot be undone.")) return;
+        setDeleting(true);
+        try {
+            const data = await deleteStartup(startup._id);
+            if (data.deletedCount > 0) {
+                toast.success("Startup deleted.");
+                setStartup(null);
+                setForm(EMPTY_FORM);
+                setLogoPreview(null);
+                setLogoFile(null);
+            }
+        } catch (err) {
+            toast.error(err.message || "Failed to delete.");
+        } finally {
+            setDeleting(false); }
+    };
+
+    if (loading) return (
+        <div className="flex justify-center py-20">
+            <span className="loading loading-spinner loading-lg text-secondary" />
+        </div>
+    );
 
     return (
         <div>
-            <div className="mb-8">
-                <h1 className="text-2xl font-black text-base-content">
-                    Welcome, {session?.user?.name?.split(" ")[0] || "Founder"} 👋
-                </h1>
-                <p className="text-sm text-base-content/50 mt-1">
-                    Here is your founder dashboard overview.
-                </p>
-            </div>
-
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-8">
-
-                {/* ── Stat Cards ── */}
-                <div className="flex flex-col gap-2">
-                    {statCards.map(({ label, value, icon: Icon, color, bg }) => (
-                        <div key={label} className="flex items-center gap-4 p-5 rounded-2xl border border-base-300 bg-base-100 flex-1">
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bg}`}>
-                                <Icon className={color} size={22} />
-                            </div>
-                            <div>
-                                {loading ? (
-                                    <div className="h-7 w-10 rounded bg-base-300 animate-pulse mb-1" />
-                                ) : (
-                                    <p className="text-2xl font-black text-base-content">{value}</p>
-                                )}
-                                <p className="text-xs text-base-content/50">{label}</p>
-                            </div>
-                        </div>
-                    ))}
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-2xl font-black text-base-content">My Startup</h1>
+                    <p className="text-sm text-base-content/50 mt-1">
+                        {startup ? "Update your startup profile" : "Create your startup profile"}
+                    </p>
                 </div>
-
-                {/* Startup Status Card */}
-                <div className="rounded-2xl border border-base-300 bg-base-100 p-6 flex flex-col">
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">
-                            <FiTrendingUp size={16} className="text-secondary" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-base-content text-sm">Startup Status</h3>
-                            <p className="text-xs text-base-content/40">Your startup profile</p>
-                        </div>
-                    </div>
-                    {loading ? (
-                        <div className="h-20 rounded-xl bg-base-300 animate-pulse" />
-                    ) : startupStatus === "approved" ? (
-                        <div className="flex items-center gap-3 p-4 rounded-xl bg-success/10 border border-success/30">
-                            <FiCheckCircle size={20} className="text-success" />
-                            <div>
-                                <p className="text-sm font-bold text-success">Approved</p>
-                                <p className="text-xs text-base-content/50">Your startup is live and can post opportunities.</p>
-                            </div>
-                        </div>
-                    ) : startupStatus === "pending" ? (
-                        <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/30">
-                            <FiClock size={20} className="text-warning" />
-                            <div>
-                                <p className="text-sm font-bold text-warning">Pending Approval</p>
-                                <p className="text-xs text-base-content/50">Waiting for admin approval before posting.</p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-3 p-4 rounded-xl bg-base-200 border border-base-300">
-                            <FiAlertCircle size={20} className="text-base-content/50" />
-                            <div>
-                                <p className="text-sm font-bold text-base-content">No Startup Profile</p>
-                                <p className="text-xs text-base-content/50">Create your startup to get started.</p>
-                            </div>
-                        </div>
+                <div className="flex items-center gap-3">
+                    {/* Status badge */}
+                    {startup?.status && (
+                        <span className={`badge badge-md gap-1 ${
+                            startup.status === "approved"
+                                ? "badge-success"
+                                : "badge-warning"
+                        }`}>
+                            {startup.status === "approved" ? (
+                                <><FiCheckCircle size={12} /> Approved</>
+                            ) : (
+                                <><FiClock size={12} /> Pending Approval</>
+                            )}
+                        </span>
+                    )}
+                    {startup && (
+                        <button
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="btn btn-error btn-sm btn-outline rounded-xl gap-2"
+                        >
+                            {deleting ? <span className="loading loading-spinner loading-xs" /> : <FiTrash2 size={14} />}
+                            Delete
+                        </button>
                     )}
                 </div>
             </div>
 
-            {/* ── Quick Actions ── */}
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-base-content/40 mb-4">
-                Quick Actions
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-                {quickLinks.map(({ href, label, desc, icon: Icon }) => (
-                    <Link
-                        key={href}
-                        href={href}
-                        className="flex items-center justify-between gap-4 p-5 rounded-2xl border border-base-300 bg-base-100 hover:border-secondary/40 hover:bg-base-100 transition-all group"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
-                                <Icon size={18} className="text-secondary" />
+            {/* Pending notice */}
+            {startup?.status === "pending" && (
+                <div className="mb-6 px-4 py-3 rounded-xl bg-warning/10 border border-warning/30 text-warning text-sm flex items-center gap-2">
+                    <FiClock size={14} />
+                    Your startup is awaiting admin approval. It will not appear on the public browse page until approved.
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="rounded-2xl border border-base-300 bg-base-100 p-6 lg:p-8 flex flex-col gap-6">
+
+                {/* Logo upload */}
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+                        Startup Logo
+                    </label>
+                    <label className="flex items-center gap-4 px-5 py-4 rounded-xl border-2 border-dashed border-base-300 bg-base-200 hover:border-secondary/50 cursor-pointer transition-colors group">
+                        {logoPreview ? (
+                            <img src={logoPreview} alt="logo" className="w-12 h-12 rounded-xl object-cover ring-2 ring-secondary/30" />
+                        ) : (
+                            <div className="w-12 h-12 rounded-xl bg-base-300 flex items-center justify-center group-hover:bg-secondary/10 transition-colors">
+                                <FiZap size={20} className="text-secondary" />
                             </div>
-                            <div>
-                                <p className="font-bold text-base-content group-hover:text-secondary transition-colors text-sm">
-                                    {label}
-                                </p>
-                                <p className="text-xs text-base-content/50">{desc}</p>
-                            </div>
+                        )}
+                        <div>
+                            <p className="text-sm font-medium text-base-content/70">
+                                {logoFile ? logoFile.name : "Click to upload logo"}
+                            </p>
+                            <p className="text-xs text-base-content/40">PNG, JPG up to 5MB</p>
                         </div>
-                        <FiArrowRight className="text-base-content/30 group-hover:text-secondary transition-colors shrink-0" size={16} />
-                    </Link>
-                ))}
-            </div>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                                const f = e.target.files[0];
+                                if (f) { setLogoFile(f); setLogoPreview(URL.createObjectURL(f)); }
+                            }}
+                        />
+                    </label>
+                </div>
+
+                {/* Name + Industry */}
+                <div className="grid sm:grid-cols-2 gap-5">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+                            Startup Name
+                        </label>
+                        <input
+                            value={form.startup_name}
+                            onChange={(e) => setForm({ ...form, startup_name: e.target.value })}
+                            placeholder="My Awesome Startup"
+                            className="py-3 px-4 rounded-xl text-sm bg-base-200 border border-base-300 text-base-content outline-none focus:border-secondary transition-colors"
+                            required
+                        />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+                            Industry
+                        </label>
+                        <select
+                            value={form.industry}
+                            onChange={(e) => setForm({ ...form, industry: e.target.value })}
+                            className="py-3 px-4 rounded-xl text-sm bg-base-200 border border-base-300 text-base-content outline-none focus:border-secondary transition-colors"
+                            required
+                        >
+                            <option value="">Select Industry</option>
+                            {industries.map((i) => <option key={i}>{i}</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Team Size Needed */}
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+                        Team Size Needed
+                    </label>
+                    <input
+                        type="number"
+                        value={form.team_size}
+                        onChange={(e) => setForm({ ...form, team_size: e.target.value })}
+                        placeholder="e.g. 5"
+                        min={1}
+                        className="py-3 px-4 rounded-xl text-sm bg-base-200 border border-base-300 text-base-content outline-none focus:border-secondary transition-colors"
+                    />
+                </div>
+
+                {/* Description */}
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+                        Description
+                    </label>
+                    <textarea
+                        value={form.description}
+                        onChange={(e) => setForm({ ...form, description: e.target.value })}
+                        rows={4}
+                        placeholder="Describe your startup idea, mission, and vision…"
+                        className="py-3 px-4 rounded-xl text-sm bg-base-200 border border-base-300 text-base-content outline-none focus:border-secondary transition-colors resize-none"
+                        required
+                    />
+                </div>
+
+                {/* Funding stage */}
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+                        Funding Stage
+                    </label>
+                    <select
+                        value={form.funding_stage}
+                        onChange={(e) => setForm({ ...form, funding_stage: e.target.value })}
+                        className="py-3 px-4 rounded-xl text-sm bg-base-200 border border-base-300 text-base-content outline-none focus:border-secondary transition-colors"
+                    >
+                        {fundingStages.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={saving}
+                    className="btn btn-secondary rounded-xl gap-2 font-bold self-start"
+                >
+                    {saving
+                        ? <span className="loading loading-spinner loading-xs" />
+                        : <FiSave size={15} />
+                    }
+                    {startup ? "Save Changes" : "Create Startup"}
+                </button>
+            </form>
         </div>
     );
 }

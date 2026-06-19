@@ -15,8 +15,6 @@ const workTypeBadge = {
     "Hybrid":  "badge-primary badge-outline",
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 const DetailSkeleton = () => (
     <div className="rounded-2xl border border-base-300 bg-base-100 p-8 flex flex-col gap-6 animate-pulse">
@@ -49,14 +47,14 @@ function ApplyModal({ opportunity, user, onClose }) {
     const [status, setStatus]         = useState("idle"); // idle | loading | success | error
     const [errMsg, setErrMsg]         = useState("");
 
-    const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
         e.preventDefault();
         if (!motivation.trim()) { setErrMsg("Please write a motivation message."); return; }
         setStatus("loading");
         setErrMsg("");
 
         try {
-            const res = await fetch(`${API_BASE}/api/applications`, {
+            const res = await fetch("/api/applications", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -67,7 +65,6 @@ function ApplyModal({ opportunity, user, onClose }) {
                     motivation:      motivation,
                     status:          "pending",
                     applied_at:      new Date().toISOString(),
-                    // handy denormalised fields for display
                     role_title:      opportunity.role_title,
                     startup_name:    opportunity.startup_name,
                 }),

@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     if (isPending) return;
     if (!session) {
-      router.replace("/signin");
+      router.replace(`/signin?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 

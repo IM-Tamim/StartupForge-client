@@ -22,10 +22,9 @@ export default function PostLoginPage() {
                 return;
             }
 
-            const role = data.role;
-            if (role === "admin")        router.replace("/dashboard/admin");
-            else if (role === "founder") router.replace("/dashboard/founder");
-            else                         router.replace("/dashboard/collaborator");
+            const redirect = localStorage.getItem("redirectAfterLogin") || "/";
+            localStorage.removeItem("redirectAfterLogin");
+            router.replace(redirect);
         };
         finish();
     }, [router]);

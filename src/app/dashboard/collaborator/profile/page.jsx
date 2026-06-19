@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 import { FiSave, FiUpload, FiX } from "react-icons/fi";
 
 const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function CollaboratorProfilePage() {
     const { data: session, isPending } = authClient.useSession();
@@ -53,10 +52,10 @@ export default function CollaboratorProfilePage() {
             let imageUrl = session?.user?.image || "";
             if (imageFile) imageUrl = await uploadToImgbb(imageFile);
 
-            const res = await fetch(`${API_BASE}/api/users/profile`, {
+            const res = await fetch("/api/users/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                credentials: "include",   // ← THIS LINE IS MISSING
+                credentials: "include",
                 body: JSON.stringify({ ...form, image: imageUrl, email: session.user.email }),
             });
             const data = await res.json();
