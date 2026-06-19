@@ -1,7 +1,7 @@
 "use client";
-import { useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardRedirectPage() {
     const { data: session, isPending } = authClient.useSession();
@@ -9,13 +9,13 @@ export default function DashboardRedirectPage() {
 
     useEffect(() => {
         if (isPending) return;
+
         if (!session) { router.push("/signin"); return; }
 
-        const role = session.user?.role;
-        if (role === "founder")        router.push("/dashboard/founder");
-        else if (role === "collaborator") router.push("/dashboard/collaborator");
-        else if (role === "admin")     router.push("/dashboard/admin");
-        else                           router.push("/dashboard/founder");
+        const role = session.user.role;
+        if (role === "founder")       router.push("/dashboard/founder");
+        else if (role === "admin")    router.push("/dashboard/admin");
+        else                          router.push("/dashboard/collaborator");
     }, [session, isPending, router]);
 
     return (
