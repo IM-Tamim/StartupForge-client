@@ -6,8 +6,8 @@
 
 ## Live Demo
 
-- **Client:** [your-client-url.vercel.app](https://your-client-url.vercel.app)
-- **Server:** [your-server-url.vercel.app](https://your-server-url.vercel.app)
+- **Client:** [https://startupforge-client.netlify.app](https://startupforge-client.netlify.app)
+- **Server:** [https://startupforge-server.onrender.com](https://startupforge-server.onrender.com)
 
 ---
 
@@ -163,8 +163,8 @@ INTERNAL_API_KEY=a_long_random_secret_string
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/startupforge.git
-cd startupforge
+git clone https://github.com/IM-Tamim/StartupForge-client.git
+cd StartupForge-client
 ```
 
 ### 2. Set up the server

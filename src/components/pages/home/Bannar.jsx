@@ -108,9 +108,9 @@ const AnimatedCards = () => (
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 1.1, duration: 0.4, ease: "backOut" }}
-        className="px-4 py-1.5 rounded-full bg-secondary text-secondary text-xs font-bold flex items-center gap-1.5 shadow-md whitespace-nowrap"
+        className="px-4 py-1.5 rounded-full bg-primary text-secondary text-xs font-bold flex items-center gap-1.5 shadow-md whitespace-nowrap"
       >
-        <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+        <span className="w-2 h-2 rounded-full animate-pulse" />
         Match Found!
       </motion.div>
     </motion.div>
