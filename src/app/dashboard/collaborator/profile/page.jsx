@@ -5,21 +5,21 @@ import toast from "react-hot-toast";
 import { FiSave, FiUpload, FiX } from "react-icons/fi";
 
 const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
-const API_BASE  = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function CollaboratorProfilePage() {
     const { data: session, isPending } = authClient.useSession();
-    const [saving, setSaving]          = useState(false);
-    const [imageFile, setImageFile]    = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
-    const [skillInput, setSkillInput]  = useState("");
+    const [skillInput, setSkillInput] = useState("");
     const [form, setForm] = useState({ name: "", bio: "", skills: [] });
 
     useEffect(() => {
         if (!session?.user) return;
         setForm({
-            name:   session.user.name   || "",
-            bio:    session.user.bio    || "",
+            name: session.user.name || "",
+            bio: session.user.bio || "",
             skills: session.user.skills || [],
         });
         if (session.user.image) setImagePreview(session.user.image);
@@ -28,7 +28,7 @@ export default function CollaboratorProfilePage() {
     const uploadToImgbb = async (file) => {
         const fd = new FormData();
         fd.append("image", file);
-        const res  = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
         const data = await res.json();
         if (!data.success) throw new Error("Image upload failed");
         return data.data.url;
@@ -56,6 +56,7 @@ export default function CollaboratorProfilePage() {
             const res = await fetch(`${API_BASE}/api/users/profile`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
+                credentials: "include",   // ← THIS LINE IS MISSING
                 body: JSON.stringify({ ...form, image: imageUrl, email: session.user.email }),
             });
             const data = await res.json();

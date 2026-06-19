@@ -111,7 +111,7 @@ export default function AdminUsersPage() {
                                     disabled={actingId === user._id}
                                     className={`btn btn-sm rounded-xl gap-1.5 ${
                                         isBlocked
-                                            ? "btn-outline btn-success"
+                                            ? "btn-outline btn-primary"
                                             : "btn-outline btn-error"
                                     }`}
                                 >

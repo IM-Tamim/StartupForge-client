@@ -1,26 +1,23 @@
 "use client";
-import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
-export default function DashboardRedirectPage() {
-    const { data: session, isPending } = authClient.useSession();
-    const router = useRouter();
+export default function DashboardRedirect() {
+  const { data: session, isPending } = authClient.useSession();
+  const router = useRouter();
 
-    useEffect(() => {
-        if (isPending) return;
+  useEffect(() => {
+    if (isPending || !session) return;
+    const role = session.user.role;
+    if (role === "admin")        router.replace("/dashboard/admin");
+    else if (role === "founder") router.replace("/dashboard/founder");
+    else                         router.replace("/dashboard/collaborator");
+  }, [session, isPending, router]);
 
-        if (!session) { router.push("/signin"); return; }
-
-        const role = session.user.role;
-        if (role === "founder")       router.push("/dashboard/founder");
-        else if (role === "admin")    router.push("/dashboard/admin");
-        else                          router.push("/dashboard/collaborator");
-    }, [session, isPending, router]);
-
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-base-200">
-            <span className="loading loading-spinner loading-lg text-secondary" />
-        </div>
-    );
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <span className="loading loading-spinner loading-lg text-secondary" />
+    </div>
+  );
 }

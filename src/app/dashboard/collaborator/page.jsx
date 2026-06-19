@@ -7,9 +7,6 @@ import {
     FiBriefcase, FiSearch, FiUser, FiTrendingUp,
 } from "react-icons/fi";
 import { getApplications } from "@/lib/api/applications";
-import {
-    PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
-} from "recharts";
 
 export default function CollaboratorOverviewPage() {
     const { data: session } = authClient.useSession();
@@ -26,32 +23,32 @@ export default function CollaboratorOverviewPage() {
             .then((apps) => {
                 const appsArr = Array.isArray(apps) ? apps : apps.applications || [];
                 setStats({
-                    total:    appsArr.length,
-                    pending:  appsArr.filter((a) => a.status === "pending").length,
+                    total: appsArr.length,
+                    pending: appsArr.filter((a) => a.status === "pending").length,
                     accepted: appsArr.filter((a) => a.status === "accepted").length,
                     rejected: appsArr.filter((a) => a.status === "rejected").length,
                 });
             })
-            .catch(() => {})
+            .catch(() => { })
             .finally(() => setLoading(false));
     }, [session]);
 
     const pieData = [
         { name: "Accepted", value: stats.accepted, fill: "#10b981" },
-        { name: "Pending",  value: stats.pending,  fill: "#f59e0b" },
+        { name: "Pending", value: stats.pending, fill: "#f59e0b" },
         { name: "Rejected", value: stats.rejected, fill: "#ef4444" },
     ].filter((d) => d.value > 0);
 
     const statCards = [
-        { label: "Applications Sent", value: stats.total,    icon: FiFileText,    color: "text-secondary",  bg: "bg-secondary/10"  },
-        { label: "Pending",          value: stats.pending,   icon: FiClock,       color: "text-warning",    bg: "bg-warning/10"    },
-        { label: "Accepted",         value: stats.accepted,  icon: FiCheckCircle, color: "text-success",    bg: "bg-success/10"    },
+        { label: "Applications Sent", value: stats.total, icon: FiFileText, color: "text-secondary", bg: "bg-secondary/10" },
+        { label: "Pending", value: stats.pending, icon: FiClock, color: "text-warning", bg: "bg-warning/10" },
+        { label: "Accepted", value: stats.accepted, icon: FiCheckCircle, color: "text-success", bg: "bg-success/10" },
     ];
 
     const quickLinks = [
-        { href: "/opportunities",                          label: "Browse Opportunities", desc: "Find open roles from startups",      icon: FiSearch     },
-        { href: "/dashboard/collaborator/my-applications", label: "My Applications",      desc: "Track status of your applications",  icon: FiFileText   },
-        { href: "/dashboard/collaborator/profile",         label: "My Profile",            desc: "Update your skills and bio",         icon: FiUser       },
+        { href: "/opportunities", label: "Browse Opportunities", desc: "Find open roles from startups", icon: FiSearch },
+        { href: "/dashboard/collaborator/my-applications", label: "My Applications", desc: "Track status of your applications", icon: FiFileText },
+        { href: "/dashboard/collaborator/profile", label: "My Profile", desc: "Update your skills and bio", icon: FiUser },
     ];
 
     return (
@@ -65,77 +62,25 @@ export default function CollaboratorOverviewPage() {
                 </p>
             </div>
 
-            {/* ── Stat Cards ── */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-                {statCards.map(({ label, value, icon: Icon, color, bg }) => (
-                    <div key={label} className="flex items-center gap-4 p-5 rounded-2xl border border-base-300 bg-base-100">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bg}`}>
-                            <Icon className={color} size={22} />
-                        </div>
-                        <div>
-                            {loading ? (
-                                <div className="h-7 w-10 rounded bg-base-300 animate-pulse mb-1" />
-                            ) : (
-                                <p className="text-2xl font-black text-base-content">{value}</p>
-                            )}
-                            <p className="text-xs text-base-content/50">{label}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
 
-            {/* ── Chart + Status ── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
-
-                {/* Application Status Chart */}
-                <div className="rounded-2xl border border-base-300 bg-base-100 p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-info/10 flex items-center justify-center">
-                            <FiTrendingUp size={16} className="text-info" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-base-content text-sm">Application Status</h3>
-                            <p className="text-xs text-base-content/40">Your applications by status</p>
-                        </div>
-                    </div>
-                    <div className="h-[200px] w-full">
-                        {loading ? (
-                            <div className="h-full w-full rounded-xl bg-base-300 animate-pulse" />
-                        ) : pieData.length === 0 ? (
-                            <div className="h-full flex items-center justify-center text-sm text-base-content/40">
-                                No applications yet — start browsing!
+                {/* ── Stat Cards ── */}
+                <div className="flex flex-col gap-2 justify-between">
+                    {statCards.map(({ label, value, icon: Icon, color, bg }) => (
+                        <div key={label} className="flex items-center gap-4 p-5 rounded-2xl border border-base-300 bg-base-100 flex-1">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bg}`}>
+                                <Icon className={color} size={22} />
                             </div>
-                        ) : (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={50}
-                                        outerRadius={80}
-                                        paddingAngle={4}
-                                        dataKey="value"
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: "hsl(var(--b1))", border: "1px solid hsl(var(--bc) / 0.15)", borderRadius: "12px", fontSize: "12px" }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        )}
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-3 mt-2">
-                        {pieData.map((d) => (
-                            <div key={d.name} className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: d.fill }} />
-                                <span className="text-xs text-base-content/50">{d.name}</span>
+                            <div>
+                                {loading ? (
+                                    <div className="h-7 w-10 rounded bg-base-300 animate-pulse mb-1" />
+                                ) : (
+                                    <p className="text-2xl font-black text-base-content">{value}</p>
+                                )}
+                                <p className="text-xs text-base-content/50">{label}</p>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                 </div>
 
                 {/* Recent Applications Status */}
@@ -173,7 +118,6 @@ export default function CollaboratorOverviewPage() {
                         </div>
                     </div>
                 </div>
-
             </div>
 
             {/* ── Quick Actions ── */}
