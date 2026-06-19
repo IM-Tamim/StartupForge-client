@@ -24,10 +24,10 @@ export default function DashboardLayout({ children }) {
     if (!session) return null;
 
     return (
-        <div className="flex min-h-[calc(100vh-4rem)]">
+        <div className="flex min-h-screen">
             <DashboardSidebar user={session.user} />
             <main className="flex-1 overflow-auto bg-base-200">
-                <div className="pt-12 lg:pt-0 p-6 lg:p-8 max-w-5xl mx-auto">
+                <div className="pt-16 lg:pt-0 p-6 lg:p-8 max-w-5xl mx-auto my-10">
                     {children}
                 </div>
             </main>

@@ -1,22 +1,19 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import Navbar from "@/components/shared/Navbar";
-import Footer from "@/components/shared/Footer";
+import SiteChrome from "@/components/shared/SiteChrome";
 
 export const metadata = {
-  title: "DocAppoint",
+  title: "StartupForge",
   description:
-    "Book your doctor appointments with ease. DocAppoint is your go-to platform for finding and scheduling appointments with healthcare professionals. Experience seamless booking, personalized recommendations, and reliable reminders—all in one place. Your health, our priority.",
+    "StartupForge is where startup founders publish ideas, build teams, and recruit collaborators. Browse startups, find opportunities, and grow together.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="abyss">
       <body>
-        <Navbar/>
-        {children}
-        <Footer/>
+        <SiteChrome>{children}</SiteChrome>
         <Toaster />
       </body>
     </html>
