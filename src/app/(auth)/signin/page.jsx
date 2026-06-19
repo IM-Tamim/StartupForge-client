@@ -27,10 +27,15 @@ const SignInForm = () => {
 
             if (error) {
                 toast.error(error.message);
-            } else {
-                toast.success("Welcome back!");
-                router.push("/");
+                return;
             }
+
+            // better-auth login succeeded — now issue our own JWT cookie
+            // for the Express backend to verify on protected routes.
+            await fetch("/api/auth/issue-token", { method: "POST" });
+
+            toast.success("Welcome back!");
+            router.push("/");
         } catch (err) {
             toast.error(err.message || "Something went wrong.");
         } finally {
@@ -41,7 +46,7 @@ const SignInForm = () => {
     const handleGoogleLogin = async () => {
         const { error } = await authClient.signIn.social({
             provider: "google",
-            callbackURL: "/",
+            callbackURL: "/post-login",
         });
         if (error) toast.error(error.message);
     };
@@ -53,7 +58,6 @@ const SignInForm = () => {
         <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-base-200 via-base-100 to-base-200">
             <div className="w-full max-w-md">
 
-                {/* Brand — matches signup exactly */}
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-black tracking-tight text-base-content">
                         Startup<span className="text-secondary">Forge</span>
@@ -66,7 +70,6 @@ const SignInForm = () => {
                 <div className="rounded-2xl p-8 border border-base-300 bg-base-100 shadow-xl">
                     <form onSubmit={onSubmit} className="flex flex-col gap-5">
 
-                        {/* ── Email ── */}
                         <div className="flex flex-col gap-1.5">
                             <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
                                 Email
@@ -86,7 +89,6 @@ const SignInForm = () => {
                             </div>
                         </div>
 
-                        {/* ── Password ── */}
                         <div className="flex flex-col gap-1.5">
                             <div className="flex items-center justify-between">
                                 <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
@@ -108,7 +110,7 @@ const SignInForm = () => {
                                     name="password"
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
-                                    className={`w-full pl-11 pr-11 py-3 rounded-xl text-sm outline-none transition-all bg-base-200 text-base-content border border-base-300 focus:border-secondary`}
+                                    className="w-full pl-11 pr-11 py-3 rounded-xl text-sm outline-none transition-all bg-base-200 text-base-content border border-base-300 focus:border-secondary"
                                     required
                                 />
                                 <button
@@ -121,7 +123,6 @@ const SignInForm = () => {
                             </div>
                         </div>
 
-                        {/* ── Actions ── */}
                         <div className="flex gap-3 mt-1">
                             <button
                                 type="submit"
@@ -141,14 +142,12 @@ const SignInForm = () => {
                             </button>
                         </div>
 
-                        {/* ── Divider ── */}
                         <div className="flex items-center gap-3">
                             <div className="flex-1 h-px bg-base-300" />
                             <span className="text-xs text-base-content/40">OR</span>
                             <div className="flex-1 h-px bg-base-300" />
                         </div>
 
-                        {/* ── Google ── */}
                         <button
                             type="button"
                             onClick={handleGoogleLogin}

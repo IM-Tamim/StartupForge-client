@@ -133,10 +133,13 @@ const SignUpForm = () => {
             if (error) {
                 setFormError(error.message);
                 toast.error(error.message);
-            } else {
-                toast.success("Account created! Please sign in.");
-                router.push("/signin");
+                return;
             }
+
+            await fetch("/api/auth/issue-token", { method: "POST" });
+
+            toast.success("Welcome to StartupForge!");
+            router.push("/");
         } catch (err) {
             setFormError(err.message || "Something went wrong.");
             toast.error(err.message || "Something went wrong.");
@@ -149,7 +152,7 @@ const SignUpForm = () => {
     const handleGoogleLogin = async () => {
         const { error } = await authClient.signIn.social({
             provider: "google",
-            callbackURL: "/",
+            callbackURL: "/post-login",
         });
         if (error) toast.error(error.message);
     };

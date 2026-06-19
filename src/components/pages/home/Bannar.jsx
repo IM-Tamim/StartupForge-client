@@ -3,9 +3,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { FiArrowRight, FiZap, FiUsers, FiBriefcase, FiTrendingUp } from "react-icons/fi";
 import { useEffect, useState } from "react";
-import { getStartups } from "@/lib/api/startups";
-import { getOpportunities } from "@/lib/api/opportunities";
-import { getApplications } from "@/lib/api/applications";
+import { getPublicStats } from "@/lib/api/stats";
 
 const floatingDots = [
   { cx: "8%",  cy: "18%", r: 3, delay: 0   },
@@ -136,20 +134,15 @@ const Banner = () => {
   const [liveStats, setLiveStats] = useState({ startups: 0, collaborators: 0, teams: 0 });
 
   useEffect(() => {
-    Promise.all([
-      getStartups().catch(() => []),
-      getOpportunities().catch(() => []),
-      getApplications().catch(() => []),
-    ]).then(([startups, opps, apps]) => {
-      const startupsArr = Array.isArray(startups) ? startups : [];
-      const oppsArr     = Array.isArray(opps)     ? opps     : opps.opportunities || [];
-      const appsArr     = Array.isArray(apps)     ? apps     : apps.applications  || [];
-      setLiveStats({
-        startups:      startupsArr.length,
-        collaborators: oppsArr.length * 2 + 10,
-        teams:         appsArr.filter((a) => a.status === "accepted").length,
-      });
-    }).catch(() => {});
+    getPublicStats()
+      .then((data) => {
+        setLiveStats({
+          startups:      data.startups      || 0,
+          collaborators: (data.opportunities || 0) * 2 + 10,
+          teams:         data.teamsFormed   || 0,
+        });
+      })
+      .catch(() => {});
   }, []);
 
   const stats = [
