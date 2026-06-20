@@ -61,6 +61,15 @@ export default function CollaboratorProfilePage() {
             const data = await res.json();
 
             if (data.modifiedCount > 0 || data.acknowledged) {
+                const { error } = await authClient.updateUser({
+                    name: form.name,
+                    image: imageUrl,
+                    bio: form.bio,
+                    skills: form.skills,
+                });
+                if (error) {
+                    console.error("Session update failed:", error.message);
+                }
                 toast.success("Profile updated!");
             } else {
                 toast("No changes made.");
