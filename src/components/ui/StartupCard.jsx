@@ -33,7 +33,7 @@ const StartupCard = ({ startup }) => (
             </div>
             <div className="min-w-0">
                 <h3 className="font-bold text-base-content truncate">{startup.startup_name}</h3>
-                <p className="text-xs text-base-content/50 truncate">by {startup.founder_email}</p>
+                <p className="text-xs text-base-content/50 truncate">by {startup.founder_name || startup.founder_email}</p>
             </div>
             <span className={`badge badge-sm ml-auto shrink-0 ${badgeColor[startup.funding_stage] || "badge-ghost"}`}>
                 {startup.funding_stage}

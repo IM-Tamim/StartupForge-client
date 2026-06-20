@@ -35,7 +35,6 @@ export default function ProfilePage() {
             let imageUrl = session?.user?.image || "";
             if (imageFile) imageUrl = await uploadToImgbb(imageFile);
 
-            // Use Better Auth's built-in updateUser instead of custom /api/users/profile
             const { error } = await authClient.updateUser({
                 name: form.name,
                 image: imageUrl,
@@ -45,7 +44,6 @@ export default function ProfilePage() {
                 toast.error(error.message || "Update failed");
             } else {
                 toast.success("Profile updated!");
-                // clear the temp file so we don't re-upload on next save
                 setImageFile(null);
             }
         } catch (err) {

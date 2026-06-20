@@ -11,7 +11,7 @@ const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 const fundingStages = ["Pre-Seed", "Seed", "Series A", "Series B", "Bootstrapped", "Other"];
 const industries   = ["Tech", "Health", "Fintech", "EdTech", "SaaS", "E-commerce", "AI/ML", "Other"];
 
-const EMPTY_FORM = { startup_name: "", industry: "", description: "", funding_stage: "Pre-Seed", logo: "" };
+const EMPTY_FORM = { startup_name: "", industry: "", description: "", funding_stage: "Pre-Seed", logo: "", team_size: "", founder_name: "" };
 
 export default function MyStartupPage() {
     const { data: session } = authClient.useSession();
@@ -35,6 +35,8 @@ export default function MyStartupPage() {
                         description:   data.description   || "",
                         funding_stage: data.funding_stage || "Pre-Seed",
                         logo:          data.logo          || "",
+                        team_size:     data.team_size     || "",
+                        founder_name:  data.founder_name  || session?.user?.name || "",
                     });
                     if (data.logo) setLogoPreview(data.logo);
                 }
@@ -59,7 +61,7 @@ export default function MyStartupPage() {
             let logoUrl = form.logo;
             if (logoFile) logoUrl = await uploadToImgbb(logoFile);
 
-            const payload = { ...form, logo: logoUrl, founder_email: session.user.email };
+            const payload = { ...form, logo: logoUrl, founder_email: session.user.email, founder_name: session.user.name || "" };
 
             if (startup?._id) {
                 const data = await updateStartup(startup._id, payload);
@@ -215,6 +217,21 @@ export default function MyStartupPage() {
                             {industries.map((i) => <option key={i}>{i}</option>)}
                         </select>
                     </div>
+                </div>
+
+                {/* Team Size Needed */}
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+                        Team Size Needed
+                    </label>
+                    <input
+                        type="number"
+                        value={form.team_size}
+                        onChange={(e) => setForm({ ...form, team_size: e.target.value })}
+                        placeholder="e.g. 5"
+                        min={1}
+                        className="py-3 px-4 rounded-xl text-sm bg-base-200 border border-base-300 text-base-content outline-none focus:border-secondary transition-colors"
+                    />
                 </div>
 
                 {/* Description */}
