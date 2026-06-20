@@ -7,7 +7,10 @@ export default function PostLoginPage() {
 
     useEffect(() => {
         const finish = async () => {
-            const res  = await fetch("/api/auth/issue-token", { method: "POST" });
+            const res  = await fetch("/api/auth/issue-token", {
+                method: "POST",
+                credentials: "include",
+            });
             const data = await res.json();
 
             if (res.status === 403) {

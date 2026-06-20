@@ -11,7 +11,7 @@ const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 const fundingStages = ["Pre-Seed", "Seed", "Series A", "Series B", "Bootstrapped", "Other"];
 const industries   = ["Tech", "Health", "Fintech", "EdTech", "SaaS", "E-commerce", "AI/ML", "Other"];
 
-const EMPTY_FORM = { startup_name: "", industry: "", description: "", funding_stage: "Pre-Seed", logo: "", team_size: "", founder_name: "" };
+const EMPTY_FORM = { startup_name: "", industry: "", description: "", funding_stage: "Pre-Seed", logo: "", team_size: "" };
 
 export default function MyStartupPage() {
     const { data: session } = authClient.useSession();
@@ -36,7 +36,6 @@ export default function MyStartupPage() {
                         funding_stage: data.funding_stage || "Pre-Seed",
                         logo:          data.logo          || "",
                         team_size:     data.team_size     || "",
-                        founder_name:  data.founder_name  || session?.user?.name || "",
                     });
                     if (data.logo) setLogoPreview(data.logo);
                 }
@@ -61,7 +60,7 @@ export default function MyStartupPage() {
             let logoUrl = form.logo;
             if (logoFile) logoUrl = await uploadToImgbb(logoFile);
 
-            const payload = { ...form, logo: logoUrl, founder_email: session.user.email, founder_name: session.user.name || "" };
+            const payload = { ...form, logo: logoUrl, founder_email: session.user.email };
 
             if (startup?._id) {
                 const data = await updateStartup(startup._id, payload);

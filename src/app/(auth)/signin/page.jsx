@@ -33,11 +33,18 @@ const SignInForm = () => {
             }
 
             // better-auth login succeeded — now issue our own JWT cookie
-            // for the Express backend to verify on protected routes.
-            const tokenRes = await fetch("/api/auth/issue-token", { method: "POST" });
+            const tokenRes = await fetch("/api/auth/issue-token", {
+                method: "POST",
+                credentials: "include",
+            });
             if (tokenRes.status === 403) {
                 await authClient.signOut();
                 toast.error("Your account has been blocked. Please contact support.");
+                return;
+            }
+            if (!tokenRes.ok) {
+                const d = await tokenRes.json().catch(() => ({}));
+                toast.error(d.message || "Failed to issue token.");
                 return;
             }
 

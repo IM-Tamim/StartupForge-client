@@ -1,20 +1,20 @@
 import jwt from "jsonwebtoken";
-import { cookies, headers } from "next/headers";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { MongoClient } from "mongodb";
 
 const mongoClient = new MongoClient(process.env.MONGO_DB_URI);
 
 async function getUsersCollection() {
-    await mongoClient.connect().catch(() => {}); // no-op if already connected
+    await mongoClient.connect().catch(() => {});
     return mongoClient.db(process.env.MONGO_DB_NAME || "StartupForge_db").collection("user");
 }
 
-export async function POST() {
-    const session = await auth.api.getSession({ headers: await headers() });
+export async function POST(request) {
+    const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session?.user) {
-        return Response.json({ message: "unauthorized" }, { status: 401 });
+        return NextResponse.json({ message: "unauthorized" }, { status: 401 });
     }
 
     try {
@@ -24,7 +24,7 @@ export async function POST() {
             { projection: { isBlocked: 1 } }
         );
         if (dbUser?.isBlocked) {
-            return Response.json(
+            return NextResponse.json(
                 { message: "Your account has been blocked. Please contact support." },
                 { status: 403 }
             );
@@ -42,8 +42,8 @@ export async function POST() {
         { expiresIn: "7d" }
     );
 
-    const cookieStore = await cookies();
-    cookieStore.set("access_token", token, {
+    const response = NextResponse.json({ success: true, role: session.user.role });
+    response.cookies.set("access_token", token, {
         httpOnly: true,
         secure:   process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -51,5 +51,5 @@ export async function POST() {
         maxAge:   60 * 60 * 24 * 7, // 7 days
     });
 
-    return Response.json({ success: true, role: session.user.role });
+    return response;
 }

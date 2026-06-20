@@ -138,7 +138,10 @@ const SignUpForm = () => {
                 return;
             }
 
-            await fetch("/api/auth/issue-token", { method: "POST" });
+            await fetch("/api/auth/issue-token", {
+                method: "POST",
+                credentials: "include",
+            });
 
             toast.success("Welcome to StartupForge!");
             router.push(redirect);
