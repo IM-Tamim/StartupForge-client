@@ -1,19 +1,23 @@
+// lib/core/server.js
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export async function serverFetch(path, options = {}) {
-  const url = `${API_BASE}${path}`;
-
+  let isServerEnv = false;
   let cookieHeader = "";
+
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    cookieHeader = cookieStore
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join("; ");
+    const token = cookieStore.get("access_token");
+    if (token) {
+      cookieHeader = `access_token=${token.value}`;
+    }
+    isServerEnv = true;
   } catch {
-    // Client-side or no headers available — credentials: "include" handles cookies
+    // Browser — next/headers doesn't exist here
   }
+
+  const url = isServerEnv ? `${API_BASE}${path}` : path;
 
   const headers = {
     "Content-Type": "application/json",
