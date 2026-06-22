@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { authClient } from "@/lib/auth-client";
 import toast from "react-hot-toast";
 import {
     FiUsers, FiSearch, FiCheck, FiX,
@@ -9,6 +10,9 @@ import { getUsers } from "@/lib/api/users";
 import { updateUserBlockStatus } from "@/lib/actions/users";
 
 export default function AdminUsersPage() {
+    const { data: session } = authClient.useSession();
+    const currentAdminId = session?.user?.id;
+
     const [users, setUsers]       = useState([]);
     const [loading, setLoading]   = useState(true);
     const [search, setSearch]     = useState("");
@@ -80,6 +84,7 @@ export default function AdminUsersPage() {
                 <div className="flex flex-col gap-3">
                     {filtered.map((user) => {
                         const isBlocked = !!user.isBlocked;
+                        const isSelf = user._id === currentAdminId;
                         return (
                             <div key={user._id} className="rounded-2xl border border-base-300 bg-base-100 p-4 flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-4 min-w-0">
@@ -106,23 +111,27 @@ export default function AdminUsersPage() {
                                     </div>
                                 </div>
 
-                                <button
-                                    onClick={() => handleToggleBlock(user._id, isBlocked)}
-                                    disabled={actingId === user._id}
-                                    className={`btn btn-sm rounded-xl gap-1.5 ${
-                                        isBlocked
-                                            ? "btn-outline btn-primary"
-                                            : "btn-outline btn-error"
-                                    }`}
-                                >
-                                    {actingId === user._id ? (
-                                        <span className="loading loading-spinner loading-xs" />
-                                    ) : isBlocked ? (
-                                        <><FiShield size={13} /> Unblock</>
-                                    ) : (
-                                        <><FiShieldOff size={13} /> Block</>
-                                    )}
-                                </button>
+                                {isSelf ? (
+                                    <span className="text-xs text-base-content/40 italic btn btn-sm rounded-xl gap-1.5 btn-outline ">Admin</span>
+                                ) : (
+                                    <button
+                                        onClick={() => handleToggleBlock(user._id, isBlocked)}
+                                        disabled={actingId === user._id}
+                                        className={`btn btn-sm rounded-xl gap-1.5 ${
+                                            isBlocked
+                                                ? "btn-outline btn-primary"
+                                                : "btn-outline btn-error"
+                                        }`}
+                                    >
+                                        {actingId === user._id ? (
+                                            <span className="loading loading-spinner loading-xs" />
+                                        ) : isBlocked ? (
+                                            <><FiShield size={13} /> Unblock</>
+                                        ) : (
+                                            <><FiShieldOff size={13} /> Block</>
+                                        )}
+                                    </button>
+                                )}
                             </div>
                         );
                     })}
