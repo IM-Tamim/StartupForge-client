@@ -53,7 +53,7 @@ const Navbar = () => {
 
                     <Link href="/" className="flex items-center gap-2">
                         <Image src={logo} alt="Logo" width={40} height={40} />
-                        <span className="text-xl font-black tracking-tight text-base-content">
+                        <span className="text-xl hidden sm:block font-black tracking-tight text-base-content">
                             Startup<span className="text-secondary">Forge</span>
                         </span>
                     </Link>
@@ -137,7 +137,7 @@ const Navbar = () => {
                             </ul>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2.5 pr-8 md:pr-0">
                             <Link
                                 href="/signin"
                                 className="btn btn-sm rounded-lg text-sm font-semibold border border-base-300 bg-base-100 text-base-content hover:bg-base-200"
